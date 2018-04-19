@@ -1,6 +1,6 @@
 ---
 - name: Generate configuration files 
-  template: src=router.j2 dest=/home/odl/RCSGNG-Phase2/ROLLOUT/conf/ROLLOUT-{{item.hostname}}.txt
+  template: src=router.j2 dest=/home/odl/SC2SWIDCWR1-01/ROLLOUT/conf/ROLLOUT-{{item.hostname}}.txt
   with_items: "{{ routers }}"
    
 
