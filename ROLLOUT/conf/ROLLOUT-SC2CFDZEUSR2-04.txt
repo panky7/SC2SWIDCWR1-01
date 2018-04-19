@@ -1,0 +1,270 @@
+!--------------------------------------------------------	 
+!PRE-Check SC2CFDZEUSR2-04: Step 0 Capture the O/P of the below commands for comparison after the change
+!--------------------------------------------------------
+!
+sh int status | in Eth1/1
+!
+show interfaces Eth1/1 | in error
+!
+ 
+sh bgp vrf all summary | in 192.4.148.54
+!
+ 
+sh bgp vrf all summary | in 192.2.8.214
+!
+ 
+sh bgp vrf all summary | in 192.2.248.54
+!
+ 
+sh bgp vrf all summary | in 192.2.156.97
+!
+ 
+!
+!
+!
+!-------------------------------------------------------- 
+! SC2CFDZEUSR2-04: Shutdown the PE<=>CE interface 
+!-------------------------------------------------------- 
+
+interface Eth1/1
+shutdown
+!
+ 
+no interface vlan 2502
+!
+ 
+no interface vlan 3902
+!
+ 
+no interface vlan 3802
+!
+ 
+no interface vlan 2491
+!
+ 
+no interface vlan 1500
+!
+!
+!##################################################################################### 
+! Step 1B Rollout : SC2CFDZEUSR2-04==>CE-PE interconnection isolation if replacing Vlans interface by sub-interfaces
+!#################################################################################### 
+ 
+!-------------------------------------------------------- 
+! SC2CFDZEUSR2-04: change the interface description and configure sub-interface
+!-------------------------------------------------------- 
+!
+!
+interface Eth1/1
+ description FED_SC2-A1_Te0/0/0/8_10G
+!
+interface Ethernet1/1.2502
+ description FED_RVP_PRVSHAREDSERVICES_SC2-A1_Te0/0/0/8_10G
+ vrf member RVP_PRVSHAREDSERVICES
+encapsulation dot1q 2502
+logging event port link-status
+no ip redirects
+ip address 192.4.148.53/30
+no ipv6 redirects
+
+interface Ethernet1/1.3902
+ description FED_RVP_RUS_SC2-A1_Te0/0/0/8_10G
+ vrf member RVP_RUS
+encapsulation dot1q 3902
+logging event port link-status
+no ip redirects
+ip address 192.2.8.213/30
+no ipv6 redirects
+
+interface Ethernet1/1.3802
+ description FED_PZEUS_SC2-A1_Te0/0/0/8_10G
+ vrf member PZEUS
+encapsulation dot1q 3802
+logging event port link-status
+no ip redirects
+ip address 192.2.248.53/30
+no ipv6 redirects
+
+interface Ethernet1/1.2491
+ description FED_RVP_ETRALI_SC2-A1_Te0/0/0/8_10G
+ vrf member RVP_ETRALI
+encapsulation dot1q 2491
+logging event port link-status
+no ip redirects
+ip address 192.2.156.98/30
+no ipv6 redirects
+
+interface Ethernet1/1.1500
+ description FED_ADMIN_SC2-A1_Te0/0/0/8_10G
+encapsulation dot1q 1500
+logging event port link-status
+no ip redirects
+ip address 192.0.1.97/27
+no ipv6 redirects
+
+!
+!
+end
+copy running-config startup-config 
+
+
+!******************************************************** 
+ SC2CFDZEUSR2-04: Checks 
+!******************************************************** 
+!Check if the BFD feature is enable
+show feature | include bfd
+!
+!##################################################################################### 
+! Step 2 Rollout Standardisation :SC2CFDZEUSR2-04
+!#################################################################################### 
+!
+!--------------------------------------------------------
+!SC2CFDZEUSR2-04: interface Standardisation:
+!--------------------------------------------------------
+!
+! ==> Note: BFD is not supported Vlan: All Vlan interface must be deleted and recreated as sub interfaces
+!
+! interface Ten or GigabitEthernet
+!
+! a) Check the description format: FED_<VRF NAME>_<CE NAME>_SxPx_BW_TELCO_NUMBER
+! B) If TElco Link add: dampening 
+! C) If not native speed: bandwidth x00000
+! C) logging event link-status
+! D) Check the correct WRR
+!
+!sub-interface Ten or GigabitEthernet.wxyz
+!
+! a) Check the description format: FED_<VRF NAME>_<CE NAME>_SxPx_BW
+! B) Add if missIN ing: no ip redirects,no ip unreachables, no ip proxy-arp
+! C) Add BFD: bfd  interval 500 min_rx 500 multiplier 3 /!\ for Etherchannels: bfd interval 750 min_rx 750 multiplier 3
+!
+interface Ethernet2/2
+ !
+!
+interface Ethernet1/1.2502
+ no ip redirects 
+ no ip unreachables 
+ no ip proxy-arp 
+ bfd interval 500 min_rx 500 multiplier 3
+!
+interface Ethernet1/1.3902
+ no ip redirects 
+ no ip unreachables 
+ no ip proxy-arp 
+ bfd interval 500 min_rx 500 multiplier 3
+!
+interface Ethernet1/1.3802
+ no ip redirects 
+ no ip unreachables 
+ no ip proxy-arp 
+ bfd interval 500 min_rx 500 multiplier 3
+!
+interface Ethernet1/1.2491
+ no ip redirects 
+ no ip unreachables 
+ no ip proxy-arp 
+ bfd interval 500 min_rx 500 multiplier 3
+!
+interface Ethernet1/1.1500
+ no ip redirects 
+ no ip unreachables 
+ no ip proxy-arp 
+ bfd interval 500 min_rx 500 multiplier 3
+!
+!
+!--------------------------------------------------------
+! SC2CFDZEUSR2-04: Update all the eBGP peers eBGP
+!--------------------------------------------------------
+!
+! a) Check the description format: eBGP <PE name>_<VRF name>>
+! B) Add if missing: neighbor <PE IP@> fall-over bfd
+! C) Delete route-maps set metrics when possible /!\ to be confirmed with HSG\MBS
+! D) Add the per neighbor route-maps for plan selection Option 1 (without static Metric) or Option 2 (static Metrics)
+!
+router bgp 64923
+!
+vrf RVP_PRVSHAREDSERVICES
+address-family ipv4 unicast
+neighbors 192.4.148.54 remote-as 64911 
+bfd
+description RVP_PRVSHAREDSERVICES_SC2-A1
+!
+vrf RVP_RUS
+address-family ipv4 unicast
+neighbors 192.2.8.214 remote-as 64911 
+bfd
+description RVP_RUS_SC2-A1
+!
+vrf PZEUS
+address-family ipv4 unicast
+neighbors 192.2.248.54 remote-as 64911 
+bfd
+description PZEUS_SC2-A1
+!
+vrf RVP_ETRALI
+address-family ipv4 unicast
+neighbors 192.2.156.97 remote-as 64911 
+bfd
+description RVP_ETRALI_SC2-A1
+!
+! 
+
+   
+ 
+### The neibhor description is not as per standard #### 
+
+!--------------------------------------------------------
+! SC2CFDZEUSR2-04: Update all the eBGP peers eBGP
+!--------------------------------------------------------
+!#####################################################################################
+! Step 4 Rollout PE-CE IN interconnection reactivation
+! ####################################################################################
+!
+!--------------------------------------------------------	 
+!  SC2CFDZEUSR2-04: Enable the PE<=>CE interface
+!--------------------------------------------------------
+!	
+!	 
+interface Eth1/1
+ no shutdown
+!
+interface Ethernet1/1.2502
+ no shutdown
+!
+interface Ethernet1/1.3902
+ no shutdown
+!
+interface Ethernet1/1.3802
+ no shutdown
+!
+interface Ethernet1/1.2491
+ no shutdown
+!
+interface Ethernet1/1.1500
+ no shutdown
+!
+! 
+copy running config startup-config
+#######################################################################
+# Post Checks CE SC2CFDZEUSR2-04
+####################################################################### 
+
+!
+sh int status | in Eth1/1
+!
+show interfaces Eth1/1 | in error
+!
+ 
+sh bgp vrf all summary | in 192.4.148.54
+!
+ 
+sh bgp vrf all summary | in 192.2.8.214
+!
+ 
+sh bgp vrf all summary | in 192.2.248.54
+!
+ 
+sh bgp vrf all summary | in 192.2.156.97
+!
+ 
+!
+!

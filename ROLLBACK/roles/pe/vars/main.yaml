@@ -1,0 +1,38 @@
+---
+routers: 
+   - hostname: SC2-A1
+     main_interface: Te0/0/0/8
+     sub_int:
+       TenGigE0/0/0/8.1500:
+         vrf: RVP_NOOBA
+       TenGigE0/0/0/8.2490:
+         vrf: RVP_ETRALI
+         nei: 192.2.156.94
+       TenGigE0/0/0/8.2501:
+         vrf: RVP_PRIVSHAREDSERVICES
+         nei: 192.4.148.49
+       TenGigE0/0/0/8.3801:
+         vrf: RVP_SHAREDSERVICES
+         nei: 192.2.248.49
+       TenGigE0/0/0/8.3901:
+         vrf: RVP_RUS
+         nei: 192.2.8.217
+     remote_as: 64923
+   - hostname: SC2-A2
+     main_interface: Te0/0/0/8
+     sub_int:
+       TenGigE0/0/0/8.1500:
+         vrf: RVP_NOOBA
+       TenGigE0/0/0/8.2491:
+         vrf: RVP_ETRALI
+         nei: 192.2.156.98
+       TenGigE0/0/0/8.2502:
+         vrf: RVP_PRIVSHAREDSERVICES
+         nei: 192.4.148.53
+       TenGigE0/0/0/8.3802:
+         vrf: RVP_SHAREDSERVICES
+         nei: 192.2.248.53
+       TenGigE0/0/0/8.3902:
+         vrf: RVP_RUS
+         nei: 192.2.8.213
+     remote_as: 64923

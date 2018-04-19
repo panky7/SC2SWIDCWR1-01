@@ -1,0 +1,395 @@
+!--------------------------------------------------------	 
+!PRE-Check SC2-A2: Step 0 Capture the O/P of the below commands for comparison after the change
+!--------------------------------------------------------	
+!
+show ip int brief | in Te0/0/0/8
+!
+show interfaces Te0/0/0/8 | in errors
+!
+ 
+sh bgp vrf all summary | in 192.2.248.53
+!
+ 
+sh bgp vrf all summary | in 192.2.8.213
+!
+ 
+sh bgp vrf all summary | in 192.4.148.53
+!
+ 
+ 
+sh bgp vrf all summary | in 192.2.156.98
+!
+!
+!
+!
+!
+
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.53 routes 
+!
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.53 routes | in Processed
+!
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.53 advertised-routes
+!
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.53 advertised-count
+
+sh bgp vrf RVP_RUS neighbors 192.2.8.213 routes 
+!
+sh bgp vrf RVP_RUS neighbors 192.2.8.213 routes | in Processed
+!
+sh bgp vrf RVP_RUS neighbors 192.2.8.213 advertised-routes
+!
+sh bgp vrf RVP_RUS neighbors 192.2.8.213 advertised-count
+
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.53 routes 
+!
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.53 routes | in Processed
+!
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.53 advertised-routes
+!
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.53 advertised-count
+
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.98 routes 
+!
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.98 routes | in Processed
+!
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.98 advertised-routes
+!
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.98 advertised-count
+!
+!#####################################################################################	 
+!Step 1A Rollout:SC2-A2 => change the description of  sub-interfaces for TIGR4-ODIN-CFD-vdc2
+!####################################################################################	 
+!
+!
+interface Te0/0/0/8
+ description FED_SC2CFDZEUSR1-03_Eth1/1_10G
+!
+interface TenGigE0/0/0/8.3802
+ description FED_RVP_SHAREDSERVICES_SC2CFDZEUSR1-03_Eth1/1_10G
+interface TenGigE0/0/0/8.3902
+ description FED_RVP_RUS_SC2CFDZEUSR1-03_Eth1/1_10G
+interface TenGigE0/0/0/8.2502
+ description FED_RVP_PRIVSHAREDSERVICES_SC2CFDZEUSR1-03_Eth1/1_10G
+interface TenGigE0/0/0/8.1500
+ description FED_RVP_NOOBA_SC2CFDZEUSR1-03_Eth1/1_10G
+interface TenGigE0/0/0/8.2491
+ description FED_RVP_ETRALI_SC2CFDZEUSR1-03_Eth1/1_10G
+!
+!
+commit comment JUMP-TICKET:Interface Description
+!
+!--------------------------------------------------------	 
+!SC2-A2 Shut down the BGP peerings and change the description for all the peers with VRF 
+!--------------------------------------------------------
+!
+router bgp 64911
+!
+vrf RVP_SHAREDSERVICES
+neighbors 192.2.248.53
+description RVP_SHAREDSERVICES_SC2CFDZEUSR1-03
+shutdown
+!
+vrf RVP_RUS
+neighbors 192.2.8.213
+description RVP_RUS_SC2CFDZEUSR1-03
+shutdown
+!
+vrf RVP_PRIVSHAREDSERVICES
+neighbors 192.4.148.53
+description RVP_PRIVSHAREDSERVICES_SC2CFDZEUSR1-03
+shutdown
+!
+vrf RVP_ETRALI
+neighbors 192.2.156.98
+description RVP_ETRALI_SC2CFDZEUSR1-03
+shutdown
+!
+!
+commit comment JUMP-TICKET:BGP Description
+!
+!--------------------------------------------------------
+!SC2-A2: Shutdown the PE<=>CE  interface
+!--------------------------------------------------------
+!
+interface Te0/0/0/8
+shutdown
+!
+interface TenGigE0/0/0/8.3802
+shutdown
+!
+interface TenGigE0/0/0/8.3902
+shutdown
+!
+interface TenGigE0/0/0/8.2502
+shutdown
+!
+interface TenGigE0/0/0/8.1500
+shutdown
+!
+interface TenGigE0/0/0/8.2491
+shutdown
+!
+!
+commit comment JUMP-TICKET: Interface shutdown
+!********************************************************	   
+!Checks-SC2-A2	   
+!********************************************************
+
+!
+show ip int brief | in Te0/0/0/8
+!
+show interfaces Te0/0/0/8 | in errors
+!
+ 
+sh bgp vrf all summary | in 192.2.248.53
+!
+ 
+sh bgp vrf all summary | in 192.2.8.213
+!
+ 
+sh bgp vrf all summary | in 192.4.148.53
+!
+ 
+ 
+sh bgp vrf all summary | in 192.2.156.98
+!
+!
+!==> Quick Double-check that neighbors are down
+!
+!
+! ==> Note: BFD is not supported Vlan: All Vlan interface must be deleted and recreated as sub interfaces
+!
+! interface Ten or GigabitEthernet
+!
+! a) Check the description format: FED_<VRF NAME>_<CE NAME>_SxPx_BW_TELCO_NUMBER
+! B) If TElco Link add: dampening 
+! C) If not native speed: bandwidth x00000
+! C) logging event link-status
+! D) Check the correct WRR
+!
+!sub-interface Ten or GigabitEthernet.wxyz
+!
+! a) Check the description format: FED_<VRF NAME>_<CE NAME>_SxPx_BW
+! B) Add if missIN ing: no ip redirects,no ip unreachables, no ip proxy-arp
+! C) Add BFD: bfd  interval 500 min_rx 500 multiplier 3 /!\ for Etherchannels: bfd interval 750 min_rx 750 multiplier 3
+!
+!#####################################################################################
+! Step 3 Rollout Standardisation :SC2-A2
+! ####################################################################################
+!	 
+!
+!--------------------------------------------------------
+! SC2-A2: interface Standardisation:
+!--------------------------------------------------------
+!
+interface Te0/0/0/8
+ service-policy input 10GE_PMAP_IN 
+ service-policy output 10GE_PMAP_OUT
+!
+interface TenGigE0/0/0/8.3802
+service-policy input 10GE_PMAP_IN 
+service-policy output 10GE_PMAP_OUT 
+ipv4 unreachables disable
+!
+interface TenGigE0/0/0/8.3902
+service-policy input 10GE_PMAP_IN 
+service-policy output 10GE_PMAP_OUT 
+ipv4 unreachables disable
+!
+interface TenGigE0/0/0/8.2502
+service-policy input 10GE_PMAP_IN 
+service-policy output 10GE_PMAP_OUT 
+ipv4 unreachables disable
+!
+interface TenGigE0/0/0/8.1500
+service-policy input 10GE_PMAP_IN 
+service-policy output 10GE_PMAP_OUT 
+ipv4 unreachables disable
+!
+interface TenGigE0/0/0/8.2491
+service-policy input 10GE_PMAP_IN 
+service-policy output 10GE_PMAP_OUT 
+ipv4 unreachables disable
+!
+!
+commit comment JUMP-TICKET: Interface standarization
+!
+!--------------------------------------------------------
+! SC2-A2 eBGP with RED or BLUE Plan + BFD (Option 1 without static Metrics) and remove the existing route-maps if any
+!--------------------------------------------------------
+!
+!
+route-policy eBGP:RED-PLAN-FROM-AS64923:IN 
+ pass
+# Empty to be used for manual switchover
+end-policy
+!
+!
+extcommunity-set rt comm_96
+  64923:9999
+end-set
+!
+route-policy eBGP:RED-PLAN-TO-AS64923:OUT
+  if (extcommunity rt matches-any comm_96) then
+    prepend as-path 64923 5
+  else
+   pass
+  endif
+end-policy
+!
+!
+router bgp 64911
+!
+vrf RVP_SHAREDSERVICES
+neighbors 192.2.248.53
+address-family ipv4 unicast
+route-policy eBGP:BLUE-PLAN-from-AS64619:IN in
+route-policy eBGP:RED-PLAN-to-AS64619:OUT out
+!
+vrf RVP_RUS
+neighbors 192.2.8.213
+address-family ipv4 unicast
+route-policy eBGP:BLUE-PLAN-from-AS64619:IN in
+route-policy eBGP:RED-PLAN-to-AS64619:OUT out
+!
+vrf RVP_PRIVSHAREDSERVICES
+neighbors 192.4.148.53
+address-family ipv4 unicast
+route-policy eBGP:BLUE-PLAN-from-AS64619:IN in
+route-policy eBGP:RED-PLAN-to-AS64619:OUT out
+!
+vrf RVP_ETRALI
+neighbors 192.2.156.98
+address-family ipv4 unicast
+route-policy eBGP:BLUE-PLAN-from-AS64619:IN in
+route-policy eBGP:RED-PLAN-to-AS64619:OUT out
+!
+!
+commit comment JUMP-TICKET:BGP Standarization
+!
+!#####################################################################################
+! Step 4 Rollout PE-CE IN interconnection reactivation
+!####################################################################################
+!
+!--------------------------------------------------------	 
+! SC2-A2: Enable the PE<=>CE interface
+!--------------------------------------------------------
+!	 
+interface Te0/0/0/8
+ no shutdown
+!
+interface TenGigE0/0/0/8.3802
+ no shutdown
+!
+interface TenGigE0/0/0/8.3902
+ no shutdown
+!
+interface TenGigE0/0/0/8.2502
+ no shutdown
+!
+interface TenGigE0/0/0/8.1500
+ no shutdown
+!
+interface TenGigE0/0/0/8.2491
+ no shutdown
+!
+!
+commit Jump Ticket: No shutdown Interface
+! 
+!********************************************************	 
+!Checks SC2-A2
+!********************************************************	
+!
+!
+show ip int brief | in Te0/0/0/8
+!
+show interfaces Te0/0/0/8 | in errors
+!
+!--------------------------------------------------------	 
+!SC2-A2: Enable all eBGPS peerings for all the interconnections' VRF
+!--------------------------------------------------------	 
+!
+!
+router bgp 64911
+!
+vrf RVP_SHAREDSERVICES
+neighbors 192.2.248.53
+no shutdown
+!
+vrf RVP_RUS
+neighbors 192.2.8.213
+no shutdown
+!
+vrf RVP_PRIVSHAREDSERVICES
+neighbors 192.4.148.53
+no shutdown
+!
+vrf RVP_ETRALI
+neighbors 192.2.156.98
+no shutdown
+!
+!
+commit comment JUMP-TICKET:BGP no-shutdown
+!
+!********************************************************	 
+!Post Checks PE SC2-A2
+!********************************************************	 
+!	 
+!
+!==> Quick Double-check no error on the interfaces 
+!
+!
+show ip int brief | in Te0/0/0/8
+!
+show interfaces Te0/0/0/8 | in errors
+!
+ 
+sh bgp vrf all summary | in 192.2.248.53
+!
+ 
+sh bgp vrf all summary | in 192.2.8.213
+!
+ 
+sh bgp vrf all summary | in 192.4.148.53
+!
+ 
+ 
+sh bgp vrf all summary | in 192.2.156.98
+!
+!
+!
+!
+!
+
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.53 routes 
+!
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.53 routes | in Processed
+!
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.53 advertised-routes
+!
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.53 advertised-count
+
+sh bgp vrf RVP_RUS neighbors 192.2.8.213 routes 
+!
+sh bgp vrf RVP_RUS neighbors 192.2.8.213 routes | in Processed
+!
+sh bgp vrf RVP_RUS neighbors 192.2.8.213 advertised-routes
+!
+sh bgp vrf RVP_RUS neighbors 192.2.8.213 advertised-count
+
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.53 routes 
+!
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.53 routes | in Processed
+!
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.53 advertised-routes
+!
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.53 advertised-count
+
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.98 routes 
+!
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.98 routes | in Processed
+!
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.98 advertised-routes
+!
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.98 advertised-count
+!

@@ -1,0 +1,81 @@
+!#####################################################################################	   
+! Rollback:	   /!\ à mettre dans un ficher distinct dans la section rollback de la DMEP .doc
+!####################################################################################	   
+!	   
+!--------------------------------------------------------	   
+! Step 1 SC2-A1: Rollback Peerings BGP and Interfacy policy map on all Interconexion	   
+!--------------------------------------------------------
+
+show configuration commit list detail | utility egrep 'Comment:  JUMP-Ticket:Interface Description' -B 4
+
+! Find the rollback ID from the last command
+
+show configuration commit changes <commit-id>
+
+! It will show the configuration of Interface description change
+! If that is the case do the rollback with the commit ID
+
+rollback configuration <commit-id> comment JUMP-Ticket:rollback
+
+!********************************************************	   
+Checks SC2-A1
+!********************************************************	   
+!
+!
+show ip int brief | in Te0/0/0/8
+!
+show interfaces Te0/0/0/8 | in errors
+!
+ 
+sh bgp vrf all summary | in 192.4.148.49
+!
+ 
+sh bgp vrf all summary | in 192.2.8.217
+!
+ 
+sh bgp vrf all summary | in 192.2.248.49
+!
+ 
+ 
+sh bgp vrf all summary | in 192.2.156.94
+!
+!
+!
+!
+!
+
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.49 routes 
+!
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.49 routes | in Processed
+!
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.49 advertised-routes
+!
+sh bgp vrf RVP_PRIVSHAREDSERVICES neighbors 192.4.148.49 advertised-count
+
+sh bgp vrf RVP_RUS neighbors 192.2.8.217 routes 
+!
+sh bgp vrf RVP_RUS neighbors 192.2.8.217 routes | in Processed
+!
+sh bgp vrf RVP_RUS neighbors 192.2.8.217 advertised-routes
+!
+sh bgp vrf RVP_RUS neighbors 192.2.8.217 advertised-count
+
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.49 routes 
+!
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.49 routes | in Processed
+!
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.49 advertised-routes
+!
+sh bgp vrf RVP_SHAREDSERVICES neighbors 192.2.248.49 advertised-count
+
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.94 routes 
+!
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.94 routes | in Processed
+!
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.94 advertised-routes
+!
+sh bgp vrf RVP_ETRALI neighbors 192.2.156.94 advertised-count
+!
+!
+
+
