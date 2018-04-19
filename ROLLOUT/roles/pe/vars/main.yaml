@@ -5,9 +5,10 @@ routers:
      sub_int:
        Gi0/6/0/9.1501:
          vrf: RVP_NOOBA
-       
+     remote_as: 64923
    - hostname: SC2-A2
      main_interface: Gi0/6/0/9
      sub_int:
-        Gi0/6/0/9.1501:
+       Gi0/6/0/9.1501:
          vrf: RVP_NOOBA
+     remote_as: 64923

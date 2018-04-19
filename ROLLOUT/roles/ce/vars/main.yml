@@ -5,10 +5,14 @@ routers:
      sub_int:
        Gi1/1.1501:
          vlan: 1501
-         ip: 192.1.26.5 255.255.255.0
-    - hostname: SC2SWIDCWR1-01
+         ip: 192.1.26.5
+         mask: 255.255.255.0
+     remote_as: 64923
+   - hostname: SC2SWIDCWR1-01
      main_interface: Gi1/1
      sub_int:
        Gi1/1.1500:
          vlan: 1501
-         ip: 192.1.26.254 255.255.255.0
+         ip: 192.1.26.254
+         mask: 255.255.255.0
+     remote_as: 64923

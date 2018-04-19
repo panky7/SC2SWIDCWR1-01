@@ -1,0 +1,55 @@
+!--------------------------------------------------------	   
+! SC2SWIDCWR1-01: Rollback interfaces Configuration
+!--------------------------------------------------------
+!-------------------------------------------------------- 
+! SC2SWIDCWR1-01: Shutdown the PE<=>CE interface 
+!-------------------------------------------------------- 
+interface Gi1/1
+shutdown
+ !
+!
+no interface Gi1/1.1500
+
+!******************************************************** 
+ SC2SWIDCWR1-01: Rollback interface configuration
+!******************************************************** 
+interface Gi1/1
+description FED_SC2-A1_Te0/0/0/8_10G
+switchport
+switchport mode trunk
+switchport trunk native vlan 999
+switchport trunk allowed vlan add 1501
+logging event port link-status
+logging event port trunk-status
+interface vlan 1501
+ description FED_ADMIN_SC2-A1_Te0/0/0/8_10G
+bfd interval 500 min_rx 500 multiplier 3
+logging event port link-status
+no ip redirects
+ip address 192.1.26.254
+no ipv6 redirects
+
+
+!-------------------------------------------------------- 
+! SC2SWIDCWR1-01: no Shutdown the PE<=>CE interface 
+!-------------------------------------------------------- 
+
+interface Gi1/1
+no shutdown
+ !
+!
+interface vlan 1501
+no shutdown
+
+!--------------------------------------------------------	 
+!POST-Check SC2SWIDCWR1-01: Capture the O/P of the below commands for comparison after the rollback
+!--------------------------------------------------------
+!
+sh int status | in Gi1/1
+!
+show interfaces Gi1/1 | in error
+!
+ 
+!
+
+
