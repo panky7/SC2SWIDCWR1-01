@@ -30,19 +30,19 @@ sh bgp vrf {{ cfd.vrf }} neighbors {{ cfd.nei }} advertised-count
 {% endfor %}
 !
 !#####################################################################################	 
-!Step 1A Rollout:{{item.hostname}} => change the description of  sub-interfaces for TIGR4-ODIN-CFD-vdc2
+!Step 1A Rollout:{{item.hostname}} => change the description of  sub-interfaces for {{item.CE}}
 !####################################################################################	 
 !
 !
 interface {{item.main_interface}}
- description FED_SC2CFDZEUSR1-03_Eth1/1_10G
+ description FED_{{item.CE}}_{{item.CE_interface}}_1G
 !
 {% for int, cfd in item.sub_int.items() %}
 interface {{ int }}
 {% if cfd.vrf is defined %}
- description FED_{{ cfd.vrf }}_SC2CFDZEUSR1-03_Eth1/1_10G
+ description FED_{{ cfd.vrf }}_{{item.CE}}_{{item.CE_interface}}_1G
 {% else %}
- description FED_{{ cfd.vrf }}_SC2CFDZEUSR1-03_Eth1/1_10G
+ description FED_{{ cfd.vrf }}_{{item.CE}}_{{item.CE_interface}}_1G
 {% endif %}
 {% endfor %}
 !
@@ -53,13 +53,13 @@ commit comment JUMP-TICKET:Interface Description
 !{{item.hostname}} Shut down the BGP peerings and change the description for all the peers with VRF 
 !--------------------------------------------------------
 !
-router bgp 64911
-!
 {% for int, cfd in item.sub_int.items() %}
 {% if cfd.nei is defined %}
+router bgp 64911
+!
 vrf {{ cfd.vrf }}
 neighbors {{ cfd.nei }}
-description {{ cfd.vrf }}_SC2CFDZEUSR1-03
+description {{ cfd.vrf }}_{{item.CE}}
 shutdown
 !
 {% endif %}

@@ -6,9 +6,15 @@ routers:
        Gi0/6/0/9.1501:
          vrf: RVP_NOOBA
      remote_as: 64923
+     CE: SC2WIDCWR1-01
+     CE_interface: Gi0/1
+     speed: 1G
    - hostname: SC2-A2
      main_interface: Gi0/6/0/9
      sub_int:
        Gi0/6/0/9.1501:
          vrf: RVP_NOOBA
      remote_as: 64923
+     CE: SC2WIDCWR3-01
+     CE_interface: Gi0/1
+     speed: 1G

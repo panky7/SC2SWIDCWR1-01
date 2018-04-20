@@ -8,6 +8,9 @@ routers:
          ip: 192.1.26.5
          mask: 255.255.255.0
      remote_as: 64923
+     PE: SC2-A1
+     PE_interface: Gi0/6/0/9
+     speed: 1G
    - hostname: SC2SWIDCWR1-01
      main_interface: Gi1/1
      sub_int:
@@ -16,3 +19,6 @@ routers:
          ip: 192.1.26.254
          mask: 255.255.255.0
      remote_as: 64923
+     PE: SC-A1
+     PE_interface: Gi0/6/0/9
+     speed: 1G

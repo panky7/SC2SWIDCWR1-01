@@ -31,10 +31,10 @@ no interface vlan 1501
 !
 !
 interface Gi0/1
- description FED_SC2-A1_Te0/0/0/8_10G
+ description FED_SC2-A1_Gi0/6/0/9_1G
 !
 interface Gi1/1.1501
- description FED_ADMIN_SC2-A1_Te0/0/0/8_10G
+ description FED_ADMIN_SC2-A1_Gi0/6/0/9_1G
 encapsulation dot1q 1501
 logging event port link-status
 no ip redirects
@@ -95,8 +95,6 @@ interface Gi1/1.1501
 ! B) Add if missing: neighbor <PE IP@> fall-over bfd
 ! C) Delete route-maps set metrics when possible /!\ to be confirmed with HSG\MBS
 ! D) Add the per neighbor route-maps for plan selection Option 1 (without static Metric) or Option 2 (static Metrics)
-!
-router bgp 64923
 !
 ! 
 

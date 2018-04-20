@@ -13,15 +13,15 @@ show interfaces Gi0/6/0/9 | in errors
 !
 !
 !#####################################################################################	 
-!Step 1A Rollout:SC2-A2 => change the description of  sub-interfaces for TIGR4-ODIN-CFD-vdc2
+!Step 1A Rollout:SC2-A2 => change the description of  sub-interfaces for SC2WIDCWR3-01
 !####################################################################################	 
 !
 !
 interface Gi0/6/0/9
- description FED_SC2CFDZEUSR1-03_Eth1/1_10G
+ description FED_SC2WIDCWR3-01_Gi0/1_1G
 !
 interface Gi0/6/0/9.1501
- description FED_RVP_NOOBA_SC2CFDZEUSR1-03_Eth1/1_10G
+ description FED_RVP_NOOBA_SC2WIDCWR3-01_Gi0/1_1G
 !
 !
 commit comment JUMP-TICKET:Interface Description
@@ -29,8 +29,6 @@ commit comment JUMP-TICKET:Interface Description
 !--------------------------------------------------------	 
 !SC2-A2 Shut down the BGP peerings and change the description for all the peers with VRF 
 !--------------------------------------------------------
-!
-router bgp 64911
 !
 !
 commit comment JUMP-TICKET:BGP Description

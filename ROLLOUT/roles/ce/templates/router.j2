@@ -39,15 +39,15 @@ no interface vlan {{ cfd.vlan }}
 !
 !
 interface {{item.main_interface}}
- description FED_SC2-A1_Te0/0/0/8_10G
+ description FED_{{item.PE}}_{{item.PE_interface}}_{{item.speed}}
 !
 {% for int, cfd in item.sub_int.items() %}
 interface {{ int }}
 {% if cfd.vrf is defined %}
- description FED_{{ cfd.vrf }}_SC2-A1_Te0/0/0/8_10G
+ description FED_{{ cfd.vrf }}_{{item.PE}}_{{item.pe_interface}}_{{item.speed}}
  vrf member {{ cfd.vrf }}
 {% else %}
- description FED_ADMIN_SC2-A1_Te0/0/0/8_10G
+ description FED_ADMIN_{{item.PE}}_{{item.PE_interface}}_{{item.speed}}
 {% endif %}
 encapsulation dot1q {{ cfd.vlan }}
 logging event port link-status
@@ -113,15 +113,15 @@ interface {{ int }}
 ! C) Delete route-maps set metrics when possible /!\ to be confirmed with HSG\MBS
 ! D) Add the per neighbor route-maps for plan selection Option 1 (without static Metric) or Option 2 (static Metrics)
 !
-router bgp 64923
-!
 {% for int, cfd in item.sub_int.items() %}
 {% if cfd.nei is defined %}
+router bgp 64923
+!
 vrf {{ cfd.vrf }}
 address-family ipv4 unicast
 neighbors {{ cfd.nei }} remote-as 64911 
 bfd
-description {{ cfd.vrf }}_SC2-A1
+description {{ cfd.vrf }}_{{item.PE}}
 !
 {% endif %}
 {% endfor %}
